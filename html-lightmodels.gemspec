@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = Html::Lightmodels::VERSION
   spec.authors       = ["Federico Tomassetti"]
   spec.email         = ["f.tomassetti@gmail.com"]
-  spec.description   = %q{TODO: Write a gem description}
-  spec.summary       = %q{TODO: Write a gem summary}
+  spec.description   = %q{LightModels for HTML}
+  spec.summary       = %q{LightModels for HTML}
   spec.homepage      = ""
   spec.license       = "MIT"
 
@@ -17,6 +17,9 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
+
+  spec.dependency "lightmodels"
+  spec.dependency "rgen"
 
   spec.add_development_dependency "bundler", "~> 1.3"
   spec.add_development_dependency "rake"
