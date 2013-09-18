@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Html::Lightmodels
 
 TODO: Write a gem description
@@ -27,3 +28,9 @@ TODO: Write usage instructions here
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
+=======
+html-lightmodels
+================
+
+Building lightmodels of HTML files
+>>>>>>> fd250281a5b35a595b778d2e9df3392256a74d20
