@@ -1,9 +1,10 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'html/lightmodels/version'
+require 'html-lightmodels/version'
 
 Gem::Specification.new do |spec|
+  spec.platform      = 'java'
   spec.name          = "html-lightmodels"
   spec.version       = Html::Lightmodels::VERSION
   spec.authors       = ["Federico Tomassetti"]
@@ -18,8 +19,9 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.dependency "lightmodels"
-  spec.dependency "rgen"
+  spec.add_dependency "lightmodels"
+  spec.add_dependency "rgen"
+  spec.add_dependency "nokogiri"
 
   spec.add_development_dependency "bundler", "~> 1.3"
   spec.add_development_dependency "rake"
