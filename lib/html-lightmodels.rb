@@ -1,7 +1,3 @@
-require "html/lightmodels/version"
-
-module Html
-  module Lightmodels
-    # Your code goes here...
-  end
-end
+require "html-lightmodels/version"
+require "html-lightmodels/metamodel"
+require "html-lightmodels/parser"

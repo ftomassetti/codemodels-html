@@ -1,5 +1,5 @@
+module LightModels
 module Html
-  module Lightmodels
-    VERSION = "0.0.1"
-  end
+	VERSION = "0.0.1"
+end
 end

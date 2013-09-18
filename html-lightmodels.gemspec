@@ -6,7 +6,7 @@ require 'html-lightmodels/version'
 Gem::Specification.new do |spec|
   spec.platform      = 'java'
   spec.name          = "html-lightmodels"
-  spec.version       = Html::Lightmodels::VERSION
+  spec.version       = LightModels::Html::VERSION
   spec.authors       = ["Federico Tomassetti"]
   spec.email         = ["f.tomassetti@gmail.com"]
   spec.description   = %q{LightModels for HTML}
