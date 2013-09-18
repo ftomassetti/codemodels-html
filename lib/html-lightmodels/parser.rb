@@ -17,18 +17,21 @@ end
 def self.node_to_model(node)
 	case node
 	when Nokogiri::HTML::Document
-		model = Html::Document.new
+		model = Html::HtmlDocument.new
 		translate_many(node,model,:children)		
 		model
+	when Nokogiri::XML::Document
+		model = Html::XmlDocument.new
+		translate_many(node,model,:children)		
+		model	
 	when Nokogiri::XML::Element
 		if node.name=='script'
 			model = Html::Script.new		
 			if node.attributes['type'].value=='text/ng-template'
 				raise "Script expected to have one child, it has: #{node.children.count} #{node.children}" unless node.children.count==1
 				raise "TextExpected into Script" unless node.children[0].is_a?(Nokogiri::XML::Text)
-				script_doc = Nokogiri::XML(node.children[0].content)	
-				raise "Expected one root, found #{script_doc.children.count}. Script: #{node}" unless script_doc.children.count==1
-				model.root = node_to_model(script_doc.children[0])
+				script_doc = Nokogiri::XML(node.children[0].content)					
+				model.root = script_doc
 			end
 			# other script types are ignored...
 		else

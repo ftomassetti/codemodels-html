@@ -27,6 +27,12 @@ class Document < RGen::MetamodelBuilder::MMBase
 	contains_many_uni 'children', Element
 end
 
+class HtmlDocument < Document
+end
+
+class XmlDocument < Document
+end
+
 class DTD < Element
 	has_attr 'name', String
 end
