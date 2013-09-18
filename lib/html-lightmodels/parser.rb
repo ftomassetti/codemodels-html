@@ -31,7 +31,7 @@ def self.node_to_model(node)
 				raise "Script expected to have one child, it has: #{node.children.count} #{node.children}" unless node.children.count==1
 				raise "TextExpected into Script" unless node.children[0].is_a?(Nokogiri::XML::Text)
 				script_doc = Nokogiri::XML(node.children[0].content)					
-				model.root = script_doc
+				model.root = node_to_model(script_doc)
 			end
 			# other script types are ignored...
 		else

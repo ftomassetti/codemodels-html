@@ -12,7 +12,7 @@ class TestBasicParsing < Test::Unit::TestCase
 	def test_basic_document
 		code = "<html></html>"
 		r = Html.parse_code(code)
-		assert_class Document, r
+		assert_class HtmlDocument, r
 		assert_equal 1, r.children.count
 		assert_class Node, r.children[0] 	
 		assert_equal 'html', r.children[0].name
@@ -51,7 +51,9 @@ class TestBasicParsing < Test::Unit::TestCase
 		r = Html.parse_code(code)
 		script = r.children[0].children[0].children[0]		
 		assert_class Script, script
-		assert_class Node, script.root
+		assert_class XmlDocument, script.root
+		assert_class Node, script.root.children[0]
+		assert_equal 'a', script.root.children[0].name
 	end
 
 end
