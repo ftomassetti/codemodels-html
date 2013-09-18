@@ -21,9 +21,18 @@ def self.node_to_model(node)
 		translate_many(node,model,:children)		
 		model
 	when Nokogiri::XML::Element
-		model = Html::Node.new
-		model.name = node.name
-		translate_many(node,model,:children)
+		if node.name=='script'
+			model = Html::Script.new		
+			raise "Script expected to have one child" unless node.children.count==1
+			raise "TextExpected into Script" unless node.children[0].is_a?(Nokogiri::XML::Text)
+			script_doc = Nokogiri::XML(node.children[0].content)	
+			raise "Expected one root" unless script_doc.children.count==1
+			model.root = node_to_model(script_doc.children[0])
+		else
+			model = Html::Node.new
+			translate_many(node,model,:children)
+		end
+		model.name = node.name		
 		translate_many(node,model,:attributes,node.attributes.values)
 		model		
 	when Nokogiri::XML::Attr

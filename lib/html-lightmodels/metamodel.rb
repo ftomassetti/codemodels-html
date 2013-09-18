@@ -31,6 +31,10 @@ class DTD < Element
 	has_attr 'name', String
 end
 
+class Script < Node
+	contains_one_uni 'root', RGen::MetamodelBuilder::MMBase
+end
+
 end
 
 end
