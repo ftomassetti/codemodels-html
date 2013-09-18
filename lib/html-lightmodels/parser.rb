@@ -39,6 +39,10 @@ def self.node_to_model(node)
 			model.value = node.content
 			model		
 		end
+	when Nokogiri::XML::DTD
+		model = Html::DTD.new
+		model.name = node.name
+		model
 	else
 		raise "Unknown node class: #{node.class}"
 	end

@@ -27,6 +27,10 @@ class Document < RGen::MetamodelBuilder::MMBase
 	contains_many_uni 'children', Element
 end
 
+class DTD < Element
+	has_attr 'name', String
+end
+
 end
 
 end

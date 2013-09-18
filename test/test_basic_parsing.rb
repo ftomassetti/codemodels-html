@@ -38,4 +38,12 @@ class TestBasicParsing < Test::Unit::TestCase
 		assert_equal 'ciao', body.children[0].value
 	end
 
+	def test_basic_dtd
+		code = "<!DOCTYPE html>"
+		r = Html.parse_code(code)
+		dtd = r.children[0] 
+		assert_class DTD, dtd
+		assert_equal 'html', dtd.name
+	end
+
 end
