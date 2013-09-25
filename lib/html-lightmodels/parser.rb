@@ -13,6 +13,33 @@ def self.parse_code(code)
 	node_to_model(node_doc)
 end
 
+def self.add_source_info(node,model)
+	return if model==nil
+	model.language = LANGUAGE
+	model.source = LightModels::SourceInfo.new
+
+	model.source.begin_pos = LightModels::Position.new 
+	model.source.begin_pos.line = node.line if node.respond_to?(:line)
+
+	# bp = node.getAbsolutePosition
+	# ep = node.getAbsolutePosition+node.length
+
+	# class << instance.source
+	# 	attr_accessor :code
+	# 	def to_code
+	# 		@code
+	# 	end
+	# end
+	# instance.source.code = code[bp..ep]
+
+	# instance.source.begin_pos = LightModels::Position.new
+	# instance.source.begin_pos.line = node.lineno
+	# instance.source.begin_pos.column = node.position+1
+	# instance.source.end_pos = LightModels::Position.new	
+	# instance.source.end_pos.line = node.lineno+newlines(code,bp,ep)-1
+	# instance.source.end_pos.column = column_last_char(code,bp,ep)
+end
+
 def self.node_to_model(node)
 	case node
 	when Nokogiri::HTML::Document
@@ -60,6 +87,9 @@ def self.node_to_model(node)
 	else
 		raise "Unknown node class: #{node.class}"
 	end
+
+	add_source_info(node,model)
+	model
 end
 
 private

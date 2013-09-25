@@ -6,6 +6,7 @@ module LightModels
 module Html
 
 class HtmlNode < RGen::MetamodelBuilder::MMBase
+	include LightModels::LightModelsNode
 end
 
 class Attribute < HtmlNode
