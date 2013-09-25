@@ -2,9 +2,11 @@ require 'html-lightmodels'
 
 module TestHelper
 
-include 'lightmodels'
-include 'js-lightmodels'
-include 'html-lightmodels'
+require 'lightmodels'
+require 'js-lightmodels'
+require 'html-lightmodels'
+
+include LightModels
 
 def assert_metamodel(name,attrs,refs)
 	assert Html.const_defined?(name), "Metaclass '#{name}' not found"
