@@ -32,6 +32,12 @@ class TestParsingPuzzle < Test::Unit::TestCase
 		assert_equal 1,body.attributes.count
 		assert_equal 'ng-app',body.attributes[0].name
 		assert_equal 'puzzleApp',body.attributes[0].value
+
+		assert body.all_children.include?(body.attributes[0])
+		assert body.all_children_deep.include?(body.attributes[0])
+
+		assert body.values_map.has_key?('ng-app')
+		assert body.values_map.has_key?('puzzleApp')
 	end
 	
 

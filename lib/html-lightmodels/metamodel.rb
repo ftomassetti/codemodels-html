@@ -5,12 +5,15 @@ module LightModels
 
 module Html
 
-class Attribute < RGen::MetamodelBuilder::MMBase
+class HtmlNode < RGen::MetamodelBuilder::MMBase
+end
+
+class Attribute < HtmlNode
 	has_attr 'name', String
 	has_attr 'value', String
 end
 
-class Element < RGen::MetamodelBuilder::MMBase
+class Element < HtmlNode
 end
 
 class Node < Element
@@ -23,7 +26,7 @@ class Text < Element
 	has_attr 'value', String
 end
 
-class Document < RGen::MetamodelBuilder::MMBase
+class Document < HtmlNode
 	contains_many_uni 'children', Element
 end
 
