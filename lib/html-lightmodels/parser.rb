@@ -2,7 +2,6 @@ require 'lightmodels'
 require 'nokogiri'
 
 module LightModels
-
 module Html
 
 def self.parse_file(path)
@@ -74,6 +73,13 @@ def self.translate_many(node,model,dest,node_value=(node.send(dest)))
 	end
 end
 
+class Parser < LightModels::Parser
+
+	def parse_code(code)
+		LightModels::Html.parse_code(code)
+	end
+
 end
 
+end
 end
