@@ -12,9 +12,7 @@ class HtmlLanguage < Language
 end
 
 LANGUAGE = HtmlLanguage.new
+LightModels.register_language LANGUAGE
 
 end
 end
-
-puts "invoking register language..."
-LightModels.register_language(LightModels::Html::LANGUAGE)

@@ -3,8 +3,6 @@ require 'html-lightmodels'
 module TestHelper
 
 require 'lightmodels'
-require 'js-lightmodels'
-require 'html-lightmodels'
 
 include LightModels
 
