@@ -31,11 +31,9 @@ class TestBasicParsing < Test::Unit::TestCase
 		code = "<html>ciao</html>"
 		r = Html.parse_code(code)
 		html = r.children[0] 
-		# head and body are implicitly added...
-		body = html.children[1]
-		assert_equal 1, body.children.count
-		assert_class Text, body.children[0]
-		assert_equal 'ciao', body.children[0].value
+		assert_equal 1, html.children.count
+		assert_class Text, html.children[0]
+		assert_equal 'ciao', html.children[0].value
 	end
 
 	def test_basic_dtd
@@ -51,7 +49,7 @@ class TestBasicParsing < Test::Unit::TestCase
 		r = Html.parse_code(code)
 		script = r.children[0].children[0].children[0]		
 		assert_class Script, script
-		assert_class XmlDocument, script.root
+		assert_class HtmlDocument, script.root
 		assert_class Node, script.root.children[0]
 		assert_equal 'a', script.root.children[0].name
 	end

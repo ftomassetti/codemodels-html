@@ -18,7 +18,6 @@ class TestInfoExtraction < Test::Unit::TestCase
 		}
 		assert_code_map_to(code, {
 			'html' =>1,
-			'head' =>1, # implicit...
 			'body' =>1,
 			'p' => 1,
 			'ciao!'=> 1
