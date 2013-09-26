@@ -29,7 +29,7 @@ class TestParsingEmbeddedLanguages < Test::Unit::TestCase
 		a = li.attributes.find {|a| a.name=='ng-repeat'}
 		assert_not_nil a
 		assert_equal 1,a.foreign_asts.count
-		assert_class LightModels::Js::AstRoot,a.foreign_asts[0]
+		assert_class LightModels::Js::InInfixExpression,a.foreign_asts[0]
 	end
 
 end

@@ -12,12 +12,16 @@ module AngularJs
 def self.parser_considering_angular_embedded_code
 	LightModels.enable_foreign_asts(Attribute)
 
-	js_expression_parser = LightModels::Js::DefaultParser
+	js_parser = LightModels::Js::DefaultParser
+	js_expression_parser = LightModels::Js::ExpressionParser
 
 	p = Parser.new
 	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n|
 		n.name=='ng-repeat' ? n.value : nil
 	end
+	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n|
+		n.name=='ng-class' ? n.value : nil
+	end	
 	p
 end
 
