@@ -22,7 +22,12 @@ def self.parser_considering_angular_embedded_code
 	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n|
 		n.name=='ng-class' ? n.value : nil
 	end	
-
+	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n|
+		n.name=='ng-model' ? n.value : nil
+	end	
+	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n|
+		n.name=='ng-click' ? n.value : nil
+	end		
 	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n|
 		if n.name=='ng-href'
 			raise "Expected to start with '#/{{', instead '#{n.value}'" unless n.value.start_with?('#/{{')
