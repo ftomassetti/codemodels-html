@@ -1,8 +1,5 @@
-require 'test/unit'
-require 'lightmodels'
-require 'html-lightmodels'
-require 'js-lightmodels'
 require 'test_helper'
+require 'js-lightmodels'
  
 class TestParsingEmbeddedLanguages < Test::Unit::TestCase
 

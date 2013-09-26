@@ -1,6 +1,3 @@
-require 'test/unit'
-require 'lightmodels'
-require 'html-lightmodels'
 require 'test_helper'
  
 class TestBasicInfo < Test::Unit::TestCase

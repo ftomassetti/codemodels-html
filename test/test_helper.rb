@@ -1,3 +1,10 @@
+require 'simplecov'
+SimpleCov.start do
+	add_filter "/test/"	
+end
+
+require 'json'
+require 'test/unit'
 require 'html-lightmodels'
 
 module TestHelper
