@@ -36,6 +36,5 @@ class TestParsingPuzzle < Test::Unit::TestCase
 		assert body.values_map.has_key?('ng-app')
 		assert body.values_map.has_key?('puzzleApp')
 	end
-	
 
 end
