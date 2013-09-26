@@ -1,69 +1,6 @@
 require 'jars/jericho-html-3.3.jar'
 require 'lightmodels'
 
-module LightModels
-module Html
-
-def self.parse_file(path)
-	parse_code(IO.read(path))
-end
-
-def self.parse_code(code)
-	#Config = Java::net.htmlparser.jericho.Config
-	Java::net.htmlparser.jericho.Config.IsHTMLEmptyElementTagRecognised = true
-	xhtml = Java::net.htmlparser.jericho.Config::CompatibilityMode::XHTML
-	Java::net.htmlparser.jericho.Config.CurrentCompatibilityMode = xhtml
-	reader = java.io.StringReader.new code
-	source = Java::net.htmlparser.jericho.Source.new reader
-	node_to_model(source,code)
-end
-
-def self.absolute_pos_to_position(abspos,code)
-	p = LightModels::Position.new
-	count = 0
-	ln = nil
-	cn = nil
-	code.lines.each_with_index do |l,i|
-		count+=l.length
-		if count>=abspos
-			ln = i
-			cn = abspos-l.length-count
-			break
-		end
-	end
-	raise "It should not be nil: abs pos #{abspos}, code length #{code.length}" unless ln
-	p.line   = ln+1
-	p.column = cn+1
-	p
-end
-
-def self.add_source_info(node,model,code)
-	return if model==nil
-	#raise "Pos #{node.begin}:#{node.end}"
-	model.language = LANGUAGE
-	model.source = LightModels::SourceInfo.new
-	model.source.begin_pos = absolute_pos_to_position(node.begin,code)
-	model.source.end_pos   = absolute_pos_to_position(node.end,code)
-	
-	# bp = node.getAbsolutePosition
-	# ep = node.getAbsolutePosition+node.length
-
-	# class << instance.source
-	# 	attr_accessor :code
-	# 	def to_code
-	# 		@code
-	# 	end
-	# end
-	# instance.source.code = code[bp..ep]
-
-	# instance.source.begin_pos = LightModels::Position.new
-	# instance.source.begin_pos.line = node.lineno
-	# instance.source.begin_pos.column = node.position+1
-	# instance.source.end_pos = LightModels::Position.new	
-	# instance.source.end_pos.line = node.lineno+newlines(code,bp,ep)-1
-	# instance.source.end_pos.column = column_last_char(code,bp,ep)
-end
-
 class ::String
 
 	def first_index(sub)
@@ -83,7 +20,48 @@ class ::String
 
 end
 
-def self.node_content(node,code)
+module LightModels
+module Html
+
+class Parser < LightModels::Parser
+
+def initialize
+	@embedded_parsers = Hash.new do |h,k|
+		h[k] = []
+	end
+end
+
+def parse_file(path)
+	parse_code(IO.read(path))
+end
+
+def parse_code(code)
+	Java::net.htmlparser.jericho.Config.IsHTMLEmptyElementTagRecognised = true
+	xhtml = Java::net.htmlparser.jericho.Config::CompatibilityMode::XHTML
+	Java::net.htmlparser.jericho.Config.CurrentCompatibilityMode = xhtml
+	reader = java.io.StringReader.new code
+	source = Java::net.htmlparser.jericho.Source.new reader
+	node_to_model(source,code)
+end
+
+# It operates on original node, not on the model obtained because
+# it could have less information. For example in parsing scripts I need the
+# raw content
+def register_embedded_parser(node_class,embedded_parser,&selector)
+	@embedded_parsers[node_class] << {embedded_parser: embedded_parser, selector: selector}
+end
+
+private
+
+def add_source_info(node,model,code)
+	return if model==nil
+	model.language = LANGUAGE
+	model.source = LightModels::SourceInfo.new
+	model.source.begin_pos = absolute_pos_to_position(node.begin,code)
+	model.source.end_pos   = absolute_pos_to_position(node.end,code)
+end
+
+def node_content(node,code)
 	text_inside = code[(node.begin)..(node.end)]
 	i  = text_inside.first_index('>') 
 	start_index = node.begin+i+1
@@ -92,7 +70,7 @@ def self.node_content(node,code)
 	code[start_index,end_index-start_index]
 end
 
-def self.break_content(node,code)
+def break_content(node,code)
 	text_inside = code[(node.begin)..(node.end)]
 	#puts "Text inside #{node.name} ^#{text_inside}^ It has child elements #{node.child_elements}"
 	i  = text_inside.first_index('>') 
@@ -127,7 +105,7 @@ def self.break_content(node,code)
 	segments
 end
 
-def self.analyze_content(model,node,code)
+def analyze_content(model,node,code)
 	break_content(node,code).each do |s,e|
 		text = code[s,e-s]
 		#puts "TEXT ^#{text}^"
@@ -139,7 +117,7 @@ def self.analyze_content(model,node,code)
 	end
 end
 
-def self.node_to_model(node,code)
+def node_to_model(node,code)
 	if node.is_a? Java::NetHtmlparserJericho::Source
 		model = Html::HtmlDocument.new
 		translate_many(code,node,model,:children,node.child_elements)
@@ -157,7 +135,7 @@ def self.node_to_model(node,code)
 			if node.attributes.get('type') && node.attributes.get('type').value=='text/ng-template'
 				content = node_content(node,code)
 				script_doc = parse_code(content)				
-				model.root = script_doc
+				model.addForeign_asts script_doc
 			end
 		else			
 			model = Html::Node.new
@@ -224,12 +202,42 @@ def self.node_to_model(node,code)
 	# end
 
 	add_source_info(node,model,code)
+	check_foreign_parser(node,model)
 	model
 end
 
-private
+def check_foreign_parser(node,model)
+	@embedded_parsers[node.class].each do |ep|
+		selector = ep[:selector]
+		embedded_parser = ep[:embedded_parser]
+		embedded_code = selector.call(node)
+		if embedded_code
+			embedded_root = embedded_parser.parse_code(embedded_code)
+			model.addForeign_asts(embedded_root)
+		end
+	end
+end
 
-def self.translate_many(code,node,model,dest,node_value=(node.send(dest)))
+def absolute_pos_to_position(abspos,code)
+	p = LightModels::Position.new
+	count = 0
+	ln = nil
+	cn = nil
+	code.lines.each_with_index do |l,i|
+		count+=l.length
+		if count>=abspos
+			ln = i
+			cn = abspos-l.length-count
+			break
+		end
+	end
+	raise "It should not be nil: abs pos #{abspos}, code length #{code.length}" unless ln
+	p.line   = ln+1
+	p.column = cn+1
+	p
+end
+
+def translate_many(code,node,model,dest,node_value=(node.send(dest)))
 	return unless node_value!=nil
 	#puts "Considering #{model.class}.#{dest} (#{node_value.class})"
 	node_value.each do |el|
@@ -239,12 +247,12 @@ def self.translate_many(code,node,model,dest,node_value=(node.send(dest)))
 	end
 end
 
-class Parser < LightModels::Parser
+end # class Parser
 
-	def parse_code(code)
-		LightModels::Html.parse_code(code)
-	end
+DefaultParser = Parser.new
 
+def self.parse_code(code)
+	DefaultParser.parse_code(code)
 end
 
 end

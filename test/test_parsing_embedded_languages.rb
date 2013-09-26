@@ -1,6 +1,7 @@
 require 'test/unit'
 require 'lightmodels'
 require 'html-lightmodels'
+require 'js-lightmodels'
 require 'test_helper'
  
 class TestParsingEmbeddedLanguages < Test::Unit::TestCase
@@ -10,6 +11,7 @@ class TestParsingEmbeddedLanguages < Test::Unit::TestCase
 	include LightModels::Html
 
 	def test_source_line
+		p = AngularJs.parser_considering_angular_embedded_code
 		code = 
 	 %q{<html>
 			<body ng-app="puzzleApp">
@@ -21,8 +23,13 @@ class TestParsingEmbeddedLanguages < Test::Unit::TestCase
 			</body>
 		</html>}
 
-		r = Html.parse_code(code)
-		raise "Check that embedded nodes are there"
+		r = p.parse_code(code)
+		li = r.all_children_deep.find {|n| n.is_a?(Node) && n.name=='li'}
+		assert_not_nil li
+		a = li.attributes.find {|a| a.name=='ng-repeat'}
+		assert_not_nil a
+		assert_equal 1,a.foreign_asts.count
+		assert_class LightModels::Js::AstRoot,a.foreign_asts[0]
 	end
 
 end

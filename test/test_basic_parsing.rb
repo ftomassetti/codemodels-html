@@ -49,9 +49,9 @@ class TestBasicParsing < Test::Unit::TestCase
 		r = Html.parse_code(code)
 		script = r.children[0].children[0].children[0]		
 		assert_class Script, script
-		assert_class HtmlDocument, script.root
-		assert_class Node, script.root.children[0]
-		assert_equal 'a', script.root.children[0].name
+		assert_class HtmlDocument, script.foreign_asts[0]
+		assert_class Node, script.foreign_asts[0].children[0]
+		assert_equal 'a', script.foreign_asts[0].children[0].name
 	end
 
 end

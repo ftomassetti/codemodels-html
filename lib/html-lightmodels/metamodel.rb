@@ -2,11 +2,9 @@ require 'rgen/metamodel_builder'
 require 'lightmodels'
 
 module LightModels
-
 module Html
 
-class HtmlNode < RGen::MetamodelBuilder::MMBase
-	include LightModels::LightModelsNode
+class HtmlNode < LightModels::LightModelsAstNode
 end
 
 class Attribute < HtmlNode
@@ -41,10 +39,10 @@ class DTD < Element
 	has_attr 'name', String
 end
 
-class Script < Node
-	contains_one_uni 'root', RGen::MetamodelBuilder::MMBase
+class Script < Node	
 end
 
-end
+LightModels.enable_foreign_asts(Script)
 
+end
 end

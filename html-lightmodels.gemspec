@@ -20,6 +20,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "lightmodels"
+  spec.add_dependency "js-lightmodels"
   spec.add_dependency "rgen"
 
   spec.add_development_dependency "bundler", "~> 1.3"
