@@ -57,7 +57,9 @@ def node_content(node,code)
 	start_index = node.begin+i+1
 	li = text_inside.last_index('<')
 	end_index    = node.begin+li
-	code[start_index,end_index-start_index]
+	content = code[start_index,end_index-start_index]
+	content = "" unless content
+	content
 end
 
 private
