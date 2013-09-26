@@ -40,11 +40,11 @@ def self.parser_considering_angular_embedded_code
 	end
 	p.register_embedded_parser(Java::NetHtmlparserJericho::Element,js_expression_parser) do |n,code|
 		content = Parser.node_content(n,code)
-		if content.start_with?('{{') && content.end_with?('}}')
-			content.remove_prefix('{{').remove_postfix('}}')
-		else
-			nil
+		res = []
+		content.scan( /\{\{[^\}]*\}\}/ ).each do |content|			
+			res << content.remove_prefix('{{').remove_postfix('}}')
 		end
+		res
 	end
 	p
 end

@@ -178,8 +178,13 @@ def check_foreign_parser(node,code,model)
 		embedded_parser = ep[:embedded_parser]
 		embedded_code = selector.call(node,code)
 		if embedded_code
-			embedded_root = embedded_parser.parse_code(embedded_code)
-			model.addForeign_asts(embedded_root)
+			unless embedded_code.is_a?(Array)
+				embedded_code = [embedded_code]
+			end
+			embedded_code.each do |ec|
+				embedded_root = embedded_parser.parse_code(ec)
+				model.addForeign_asts(embedded_root)
+			end
 		end
 	end
 end
