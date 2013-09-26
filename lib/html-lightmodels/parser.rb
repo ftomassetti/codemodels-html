@@ -35,12 +35,17 @@ def parse_file(path)
 	parse_code(IO.read(path))
 end
 
-def parse_code(code)
+def raw_node_tree(code)
 	Java::net.htmlparser.jericho.Config.IsHTMLEmptyElementTagRecognised = true
 	xhtml = Java::net.htmlparser.jericho.Config::CompatibilityMode::XHTML
 	Java::net.htmlparser.jericho.Config.CurrentCompatibilityMode = xhtml
 	reader = java.io.StringReader.new code
 	source = Java::net.htmlparser.jericho.Source.new reader
+	source
+end
+
+def parse_code(code)
+	source = raw_node_tree(code)
 	node_to_model(source,code)
 end
 
@@ -51,7 +56,7 @@ def register_embedded_parser(node_class,embedded_parser,&selector)
 	@embedded_parsers[node_class] << {embedded_parser: embedded_parser, selector: selector}
 end
 
-def node_content(node,code)
+def self.node_content(node,code)
 	text_inside = code[(node.begin)..(node.end)]
 	i  = text_inside.first_index('>') 
 	start_index = node.begin+i+1
@@ -135,7 +140,7 @@ def node_to_model(node,code)
 			model = Html::Script.new	
 			model.name = node.name			
 			if node.attributes.get('type') && node.attributes.get('type').value=='text/ng-template'
-				content = node_content(node,code)
+				content = Parser.node_content(node,code)
 				script_doc = parse_code(content)				
 				model.addForeign_asts script_doc
 			end
@@ -208,6 +213,10 @@ DefaultParser = Parser.new
 
 def self.parse_code(code)
 	DefaultParser.parse_code(code)
+end
+
+def self.raw_node_tree(code)
+	DefaultParser.raw_node_tree(code)
 end
 
 end

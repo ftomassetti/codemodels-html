@@ -39,7 +39,7 @@ def self.parser_considering_angular_embedded_code
 		end
 	end
 	p.register_embedded_parser(Java::NetHtmlparserJericho::Element,js_expression_parser) do |n,code|
-		content = p.node_content(n,code)
+		content = Parser.node_content(n,code)
 		if content.start_with?('{{') && content.end_with?('}}')
 			content.remove_prefix('{{').remove_postfix('}}')
 		else

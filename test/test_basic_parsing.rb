@@ -54,4 +54,12 @@ class TestBasicParsing < Test::Unit::TestCase
 		assert_equal 'a', script.foreign_asts[0].children[0].name
 	end
 
+	def test_node_content
+		code = "<html><head><script type='text/ng-template' id='sliding-puzzle'>\n<a/>\n</script></head></html>"
+		r = Html.raw_node_tree(code)
+		script = r.child_elements[0].child_elements[0].child_elements[0]		
+		assert_equal "<head><script type='text/ng-template' id='sliding-puzzle'>\n<a/>\n</script></head>",Parser.node_content(r,code)
+		assert_equal "\n<a/>\n",Parser.node_content(script,code)
+	end
+
 end
