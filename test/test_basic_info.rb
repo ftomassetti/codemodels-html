@@ -33,4 +33,28 @@ class TestBasicInfo < Test::Unit::TestCase
 		assert_equal 2,span.eContainer.eContainer.eContainer.source.begin_pos.line # body
 	end
 
+	def test_source_line_of_text_elements
+		code = %q{<html>
+			<body>
+				<p>ciao
+					come
+					stai?</p>
+				<p>io bene</p>
+				<div><p>
+					<span></span>
+				</p></div>
+			</body>
+			</html>}
+		r = Html.parse_code(code)
+		assert_class HtmlDocument, r
+		body = nil
+		r.traverse {|n| body = n if n.is_a?(Node) && n.name=='body'}
+		assert_not_nil body
+		first_p = body.all_children[0]
+		first_p_text = first_p.all_children[0]
+		assert_class Text,first_p_text
+		assert_equal 3,first_p_text.source.begin_pos.line
+		assert_equal 5,first_p_text.source.end_pos.line
+	end	
+
 end

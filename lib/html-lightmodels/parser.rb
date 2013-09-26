@@ -119,6 +119,12 @@ def analyze_content(model,node,code)
 		unless text==nil or text.strip.empty?
 			t = Html::Text.new
 			t.value = text
+
+			t.language = LANGUAGE
+			t.source = LightModels::SourceInfo.new
+			t.source.begin_pos = absolute_pos_to_position(s,code)
+			t.source.end_pos   = absolute_pos_to_position(e,code)
+
 			model.addChildren(t)
 		end
 	end
