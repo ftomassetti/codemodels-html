@@ -51,6 +51,15 @@ def register_embedded_parser(node_class,embedded_parser,&selector)
 	@embedded_parsers[node_class] << {embedded_parser: embedded_parser, selector: selector}
 end
 
+def node_content(node,code)
+	text_inside = code[(node.begin)..(node.end)]
+	i  = text_inside.first_index('>') 
+	start_index = node.begin+i+1
+	li = text_inside.last_index('<')
+	end_index    = node.begin+li
+	code[start_index,end_index-start_index]
+end
+
 private
 
 def add_source_info(node,model,code)
@@ -59,15 +68,6 @@ def add_source_info(node,model,code)
 	model.source = LightModels::SourceInfo.new
 	model.source.begin_pos = absolute_pos_to_position(node.begin,code)
 	model.source.end_pos   = absolute_pos_to_position(node.end,code)
-end
-
-def node_content(node,code)
-	text_inside = code[(node.begin)..(node.end)]
-	i  = text_inside.first_index('>') 
-	start_index = node.begin+i+1
-	li = text_inside.last_index('<')
-	end_index    = node.begin+li
-	code[start_index,end_index-start_index]
 end
 
 def break_content(node,code)
@@ -154,63 +154,16 @@ def node_to_model(node,code)
 		raise "Unknown node class: #{node.class}"
 	end
 
-	# case node
-	# when Nokogiri::HTML::Document
-	# 	model = Html::HtmlDocument.new
-	# 	translate_many(node,model,:children)		
-	# 	model
-	# when Nokogiri::XML::Document
-	# 	model = Html::XmlDocument.new
-	# 	translate_many(node,model,:children)		
-	# 	model	
-	# when Nokogiri::XML::Element
-	# 	if node.name=='script'
-	# 		model = Html::Script.new		
-	# 		if node.attributes['type'].value=='text/ng-template'
-	# 			raise "Script expected to have one child, it has: #{node.children.count} #{node.children}" unless node.children.count==1
-	# 			raise "TextExpected into Script" unless node.children[0].is_a?(Nokogiri::XML::Text)
-	# 			script_doc = Nokogiri::XML(node.children[0].content)					
-	# 			model.root = node_to_model(script_doc)
-	# 		end
-	# 		# other script types are ignored...
-	# 	else
-	# 		model = Html::Node.new
-	# 		translate_many(node,model,:children)
-	# 	end
-	# 	model.name = node.name		
-	# 	translate_many(node,model,:attributes,node.attributes.values)
-	# 	model		
-	# when Nokogiri::XML::Attr
-	# 	model = Html::Attribute.new
-	# 	model.name = node.name
-	# 	model.value = node.value
-	# 	model
-	# when Nokogiri::XML::Text
-	# 	if node.content.strip.empty?
-	# 		nil
-	# 	else
-	# 		model = Html::Text.new
-	# 		model.value = node.content
-	# 		model		
-	# 	end
-	# when Nokogiri::XML::DTD
-	# 	model = Html::DTD.new
-	# 	model.name = node.name
-	# 	model
-	# else
-	# 	raise "Unknown node class: #{node.class}"
-	# end
-
 	add_source_info(node,model,code)
-	check_foreign_parser(node,model)
+	check_foreign_parser(node,code,model)
 	model
 end
 
-def check_foreign_parser(node,model)
+def check_foreign_parser(node,code,model)
 	@embedded_parsers[node.class].each do |ep|
 		selector = ep[:selector]
 		embedded_parser = ep[:embedded_parser]
-		embedded_code = selector.call(node)
+		embedded_code = selector.call(node,code)
 		if embedded_code
 			embedded_root = embedded_parser.parse_code(embedded_code)
 			model.addForeign_asts(embedded_root)

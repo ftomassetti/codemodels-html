@@ -11,24 +11,25 @@ module AngularJs
 
 def self.parser_considering_angular_embedded_code
 	LightModels.enable_foreign_asts(Attribute)
+	LightModels.enable_foreign_asts(Element)
 
 	js_parser = LightModels::Js::DefaultParser
 	js_expression_parser = LightModels::Js::ExpressionParser
 
 	p = Parser.new
-	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n|
+	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n,code|
 		n.name=='ng-repeat' ? n.value : nil
 	end
-	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n|
+	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n,code|
 		n.name=='ng-class' ? n.value : nil
 	end	
-	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n|
+	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n,code|
 		n.name=='ng-model' ? n.value : nil
 	end	
-	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n|
+	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n,code|
 		n.name=='ng-click' ? n.value : nil
 	end		
-	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n|
+	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n,code|
 		if n.name=='ng-href'
 			raise "Expected to start with '#/{{', instead '#{n.value}'" unless n.value.start_with?('#/{{')
 			raise "Expected to end with '}}', instead '#{n.value}'" unless n.value.end_with?('}}')
@@ -37,7 +38,14 @@ def self.parser_considering_angular_embedded_code
 			nil
 		end
 	end
-
+	p.register_embedded_parser(Java::NetHtmlparserJericho::Element,js_expression_parser) do |n,code|
+		content = p.node_content(n,code)
+		if content.start_with?('{{') && content.end_with?('}}')
+			content.remove_prefix('{{').remove_postfix('}}')
+		else
+			nil
+		end
+	end
 	p
 end
 
