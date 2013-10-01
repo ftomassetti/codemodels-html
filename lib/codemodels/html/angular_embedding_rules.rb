@@ -16,7 +16,7 @@ unless $DONE
 	CodeModels.enable_foreign_asts(Element)
 	$DONE = true
 end
-	
+
 module AngularJs
 
 def self.parser_considering_angular_embedded_code
@@ -26,6 +26,9 @@ def self.parser_considering_angular_embedded_code
 	p = Parser.new
 	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n,code|
 		n.name=='ng-repeat' ? n.value : nil
+	end
+	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n,code|
+		n.name=='ng-show' ? n.value : nil
 	end
 	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n,code|
 		n.name=='ng-class' ? n.value : nil
