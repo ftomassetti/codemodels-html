@@ -5,14 +5,21 @@
 require 'jars/jericho-html-3.3.jar'
 require 'codemodels/js'
 
+$DONE = false
+
+
 module CodeModels
 module Html
+
+unless $DONE
+	CodeModels.enable_foreign_asts(Attribute)
+	CodeModels.enable_foreign_asts(Element)
+	$DONE = true
+end
+	
 module AngularJs
 
 def self.parser_considering_angular_embedded_code
-	CodeModels.enable_foreign_asts(Attribute)
-	CodeModels.enable_foreign_asts(Element)
-
 	js_parser = CodeModels::Js::DefaultParser
 	js_expression_parser = CodeModels::Js::ExpressionParser
 
