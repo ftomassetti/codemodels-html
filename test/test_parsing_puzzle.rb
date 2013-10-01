@@ -3,8 +3,8 @@ require 'test_helper'
 class TestParsingPuzzle < Test::Unit::TestCase
 
 	include TestHelper
-	include LightModels
-	include LightModels::Html
+	include CodeModels
+	include CodeModels::Html
 
 	def test_root_structure
 		code = IO.read('test/data/puzzle.html')

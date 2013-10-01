@@ -1,12 +1,12 @@
-# Html::Lightmodels
+# codemodels-html
 
-Building lightmodels of HTML files
+Building codemodels of HTML files
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
-    gem 'html-lightmodels'
+    gem 'codemodels-html'
 
 And then execute:
 
@@ -14,7 +14,7 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install html-lightmodels
+    $ gem install codemodels-html
 
 ## Usage
 

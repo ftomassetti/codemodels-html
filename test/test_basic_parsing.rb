@@ -3,8 +3,8 @@ require 'test_helper'
 class TestBasicParsing < Test::Unit::TestCase
 
 	include TestHelper
-	include LightModels
-	include LightModels::Html
+	include CodeModels
+	include CodeModels::Html
 
 	def test_basic_document
 		code = "<html></html>"

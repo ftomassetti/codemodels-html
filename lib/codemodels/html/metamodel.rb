@@ -1,10 +1,10 @@
 require 'rgen/metamodel_builder'
-require 'lightmodels'
+require 'codemodels'
 
-module LightModels
+module CodeModels
 module Html
 
-class HtmlNode < LightModels::LightModelsAstNode
+class HtmlNode < CodeModels::CodeModelsAstNode
 end
 
 class Attribute < HtmlNode
@@ -42,7 +42,7 @@ end
 class Script < Node	
 end
 
-LightModels.enable_foreign_asts(Script)
+CodeModels.enable_foreign_asts(Script)
 
 end
 end

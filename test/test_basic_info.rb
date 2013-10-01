@@ -3,8 +3,8 @@ require 'test_helper'
 class TestBasicInfo < Test::Unit::TestCase
 
 	include TestHelper
-	include LightModels
-	include LightModels::Html
+	include CodeModels
+	include CodeModels::Html
 
 	def test_source_line
 		code = %q{<html>

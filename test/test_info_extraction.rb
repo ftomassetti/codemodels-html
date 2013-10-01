@@ -3,7 +3,7 @@ require 'test_helper'
 class TestInfoExtraction < Test::Unit::TestCase
 
 	include TestHelper
-	include LightModels
+	include CodeModels
 
 	def test_snippet_1
 		code = %q{

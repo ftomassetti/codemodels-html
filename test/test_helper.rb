@@ -5,13 +5,12 @@ end
 
 require 'json'
 require 'test/unit'
-require 'html-lightmodels'
+require 'codemodels'
+require 'codemodels/html'
 
 module TestHelper
 
-require 'lightmodels'
-
-include LightModels
+include CodeModels
 
 def assert_metamodel(name,attrs,refs)
 	assert Html.const_defined?(name), "Metaclass '#{name}' not found"
@@ -68,7 +67,7 @@ end
 
 def assert_code_map_to(code,exp)
 	r = Html.parse_code(code)
-	#ser = LightModels::Serialization.jsonize_obj(r)
+	#ser = CodeModels::Serialization.jsonize_obj(r)
 	#puts "Code <<<#{code}>>> -> #{JSON.pretty_generate(ser)}"
 	map = r.values_map
 	assert_map(exp,map)

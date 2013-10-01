@@ -3,18 +3,18 @@
 # to the idioms of the AngularJS project
 
 require 'jars/jericho-html-3.3.jar'
-require 'js-lightmodels'
+require 'codemodels/js'
 
-module LightModels
+module CodeModels
 module Html
 module AngularJs
 
 def self.parser_considering_angular_embedded_code
-	LightModels.enable_foreign_asts(Attribute)
-	LightModels.enable_foreign_asts(Element)
+	CodeModels.enable_foreign_asts(Attribute)
+	CodeModels.enable_foreign_asts(Element)
 
-	js_parser = LightModels::Js::DefaultParser
-	js_expression_parser = LightModels::Js::ExpressionParser
+	js_parser = CodeModels::Js::DefaultParser
+	js_expression_parser = CodeModels::Js::ExpressionParser
 
 	p = Parser.new
 	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n,code|

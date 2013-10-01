@@ -1,11 +1,11 @@
 require 'test_helper'
-require 'js-lightmodels'
+require 'codemodels/js'
  
 class TestParsingEmbeddedLanguages < Test::Unit::TestCase
 
 	include TestHelper
-	include LightModels
-	include LightModels::Html
+	include CodeModels
+	include CodeModels::Html
 
 	def setup
 		@p = AngularJs.parser_considering_angular_embedded_code
@@ -29,7 +29,7 @@ class TestParsingEmbeddedLanguages < Test::Unit::TestCase
 		a = li.attributes.find {|a| a.name=='ng-repeat'}
 		assert_not_nil a
 		assert_equal 1,a.foreign_asts.count
-		assert_class LightModels::Js::InInfixExpression,a.foreign_asts[0]
+		assert_class CodeModels::Js::InInfixExpression,a.foreign_asts[0]
 	end
 
 	def test_multiple_angular_expressions_in_attr

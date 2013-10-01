@@ -1,17 +1,17 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'html-lightmodels/version'
+require 'codemodels/html/version'
 
 Gem::Specification.new do |spec|
   spec.platform      = 'java'
-  spec.name          = "html-lightmodels"
-  spec.version       = LightModels::Html::VERSION
+  spec.name          = "codemodels-html"
+  spec.version       = CodeModels::Html::VERSION
   spec.authors       = ["Federico Tomassetti"]
   spec.email         = ["f.tomassetti@gmail.com"]
-  spec.description   = %q{LightModels for HTML}
-  spec.summary       = %q{LightModels for HTML}
-  spec.homepage      = ""
+  spec.description   = %q{CodeModels for HTML}
+  spec.summary       = %q{CodeModels for HTML}
+  spec.homepage      = "https://github.com/ftomassetti/codemodels-html"
   spec.license       = "Apache License 2"
 
   spec.files         = `git ls-files`.split($/)
@@ -19,8 +19,8 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "lightmodels"
-  spec.add_dependency "js-lightmodels"
+  spec.add_dependency "codemodels"
+  spec.add_dependency "codemodels-js"
   spec.add_dependency "rgen"
 
   spec.add_development_dependency "bundler", "~> 1.3"
