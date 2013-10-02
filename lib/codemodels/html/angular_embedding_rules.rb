@@ -35,6 +35,9 @@ def self.parser_considering_angular_embedded_code
 	end	
 	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n,code|
 		n.name=='ng-click' ? n.value : nil
+	end			
+	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n,code|
+		n.name=='ng-include' ? n.value : nil
 	end		
 	# p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n,code|
 	# 	if n.name=='ng-href'
