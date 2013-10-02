@@ -5,17 +5,11 @@
 require 'jars/jericho-html-3.3.jar'
 require 'codemodels/js'
 
-$DONE = false
-
-
 module CodeModels
 module Html
 
-unless $DONE
-	CodeModels.enable_foreign_asts(Attribute)
-	CodeModels.enable_foreign_asts(Element)
-	$DONE = true
-end
+CodeModels.enable_foreign_asts(Attribute)
+CodeModels.enable_foreign_asts(Node)
 
 module AngularJs
 
@@ -51,11 +45,15 @@ def self.parser_considering_angular_embedded_code
 	# 		nil
 	# 	end
 	# end
-	p.register_embedded_parser(Java::NetHtmlparserJericho::Element,js_expression_parser) do |n,code|
-		content = Parser.node_content(n,code)
+	p.register_embedded_parser(Java::NetHtmlparserJericho::Element,js_expression_parser) do |n,code|		
 		res = []
-		content.scan( /\{\{[^\}]*\}\}/ ).each do |content|			
-			res << content.remove_prefix('{{').remove_postfix('}}')
+		if n.name!='script'
+			n.text_blocks(code).each do |tb|			
+				tb.value.scan( /\{\{[^\}]*\}\}/ ).each do |content|		
+					#puts "FROM ELEMENT <<<#{n}>>> '#{content}'"
+					res << content.remove_prefix('{{').remove_postfix('}}')
+				end
+			end
 		end
 		res
 	end
@@ -63,6 +61,7 @@ def self.parser_considering_angular_embedded_code
 		content = n.value
 		res = []
 		content.scan( /\{\{[^\}]*\}\}/ ).each do |content|			
+			#puts "FROM ATTRIBUTE <<<#{n}>>> '#{content}'"
 			res << content.remove_prefix('{{').remove_postfix('}}')
 		end
 		res

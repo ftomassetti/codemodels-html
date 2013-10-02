@@ -37,4 +37,20 @@ class TestParsingPuzzle < Test::Unit::TestCase
 		assert body.values_map.has_key?('puzzleApp')
 	end
 
+	def test_no_double_foreign_asts
+		code = IO.read('test/data/puzzle.html')
+		r = AngularJs.parser_considering_angular_embedded_code.parse_code(code)
+		r.traverse do |n|
+			fa = n.class.ecore.eAllReferences.select{|ref|ref.name=='foreign_asts'}
+			fail("Node #{n} has #{fa.count} references with the name 'foreign_asts'") if fa.count > 1
+		end
+	end
+
+	def test_js_names_title
+		code = IO.read('test/data/puzzle.html')
+		r = AngularJs.parser_considering_angular_embedded_code.parse_code(code)
+		jstitles = r.all_children_deep.select {|n| n.is_a?(CodeModels::Js::Name) && n.identifier=='title'}
+		assert_equal 2,jstitles.count
+	end
+
 end

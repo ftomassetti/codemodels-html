@@ -42,7 +42,7 @@ end
 class Script < Node	
 end
 
-CodeModels.enable_foreign_asts(Script)
+#CodeModels.enable_foreign_asts(Script)
 
 end
 end

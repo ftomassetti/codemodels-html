@@ -23,6 +23,89 @@ end
 module CodeModels
 module Html
 
+	def self.absolute_pos_to_position(abspos,code)
+		p = CodeModels::Position.new
+		count = 0
+		ln = nil
+		cn = nil
+		code.lines.each_with_index do |l,i|
+			count+=l.length
+			if count>=abspos
+				ln = i
+				cn = abspos-l.length-count
+				break
+			end
+		end
+		raise "It should not be nil: abs pos #{abspos}, code length #{code.length}" unless ln
+		p.line   = ln+1
+		p.column = cn+1
+		p
+	end
+
+class TextBlock
+	attr_accessor :source
+	attr_accessor :value
+end
+
+class Java::NetHtmlparserJericho::Element 
+
+	def text_blocks(code)
+		blocks = []
+		break_content(self,code).each do |s,e|
+			text = code[s,e-s]
+			unless text==nil or text.strip.empty?
+				block = TextBlock.new
+				block.value = text
+
+				block.source = CodeModels::SourceInfo.new
+				block.source.begin_pos = Html.absolute_pos_to_position(s,code)
+				block.source.end_pos   = Html.absolute_pos_to_position(e,code)
+
+				blocks << block
+			end
+		end
+		blocks
+	end
+
+	private
+
+	def break_content(node,code)
+		text_inside = code[(node.begin)..(node.end)]
+		#puts "Text inside #{node.name} ^#{text_inside}^ It has child elements #{node.child_elements}"
+		i  = text_inside.first_index('>') 
+		#puts "Index i: #{i}"
+		start_index = node.begin+i+1
+		li = text_inside.last_index('<')
+		#puts "Index li: #{li}"
+		end_index    = node.begin+li
+		#puts "Indexes #{start_index} #{end_index}"
+		#puts "Content of #{node.name} ^#{code[start_index,end_index-start_index]}^"
+
+		# no content
+		return [] if start_index==end_index
+
+		if node.child_elements.count==0
+			return [[start_index,end_index]]
+		else
+			segments = []
+			# before the first
+			segments << [start_index,node.child_elements.first.begin]
+			# between children
+			for i in 0...(node.child_elements.count-1)
+				s = node.child_elements[i].end
+				e = node.child_elements[i+1].begin
+				segments << [s,e]
+			end
+			# after the last
+			i_last = node.child_elements.size-1
+			last_child = node.child_elements[i_last]
+			segments << [last_child.end,end_index]			
+		end
+		segments
+	end
+
+end
+
 class Parser < CodeModels::Parser
 
 	def initialize
@@ -73,60 +156,19 @@ class Parser < CodeModels::Parser
 		return if model==nil
 		model.language = LANGUAGE
 		model.source = CodeModels::SourceInfo.new
-		model.source.begin_pos = absolute_pos_to_position(node.begin,code)
-		model.source.end_pos   = absolute_pos_to_position(node.end,code)
-	end
-
-	def break_content(node,code)
-		text_inside = code[(node.begin)..(node.end)]
-		#puts "Text inside #{node.name} ^#{text_inside}^ It has child elements #{node.child_elements}"
-		i  = text_inside.first_index('>') 
-		#puts "Index i: #{i}"
-		start_index = node.begin+i+1
-		li = text_inside.last_index('<')
-		#puts "Index li: #{li}"
-		end_index    = node.begin+li
-		#puts "Indexes #{start_index} #{end_index}"
-		#puts "Content of #{node.name} ^#{code[start_index,end_index-start_index]}^"
-
-		# no content
-		return [] if start_index==end_index
-
-		if node.child_elements.count==0
-			return [[start_index,end_index]]
-		else
-			segments = []
-			# before the first
-			segments << [start_index,node.child_elements.first.begin]
-			# between children
-			for i in 0...(node.child_elements.count-1)
-				s = node.child_elements[i].end
-				e = node.child_elements[i+1].begin
-				segments << [s,e]
-			end
-			# after the last
-			i_last = node.child_elements.size-1
-			last_child = node.child_elements[i_last]
-			segments << [last_child.end,end_index]			
-		end
-		segments
+		model.source.begin_pos = Html.absolute_pos_to_position(node.begin,code)
+		model.source.end_pos   = Html.absolute_pos_to_position(node.end,code)
 	end
 
 	def analyze_content(model,node,code)
-		break_content(node,code).each do |s,e|
-			text = code[s,e-s]
-			#puts "TEXT ^#{text}^"
-			unless text==nil or text.strip.empty?
-				t = Html::Text.new
-				t.value = text
+		node.text_blocks(code).each do |tb|
+			t = Html::Text.new
+			t.value = tb.value
 
-				t.language = LANGUAGE
-				t.source = CodeModels::SourceInfo.new
-				t.source.begin_pos = absolute_pos_to_position(s,code)
-				t.source.end_pos   = absolute_pos_to_position(e,code)
+			t.language = LANGUAGE
+			t.source = tb.source
 
-				model.addChildren(t)
-			end
+			model.addChildren(t)
 		end
 	end
 
@@ -187,25 +229,6 @@ class Parser < CodeModels::Parser
 				end
 			end
 		end
-	end
-
-	def absolute_pos_to_position(abspos,code)
-		p = CodeModels::Position.new
-		count = 0
-		ln = nil
-		cn = nil
-		code.lines.each_with_index do |l,i|
-			count+=l.length
-			if count>=abspos
-				ln = i
-				cn = abspos-l.length-count
-				break
-			end
-		end
-		raise "It should not be nil: abs pos #{abspos}, code length #{code.length}" unless ln
-		p.line   = ln+1
-		p.column = cn+1
-		p
 	end
 
 	def translate_many(code,node,model,dest,node_value=(node.send(dest)))

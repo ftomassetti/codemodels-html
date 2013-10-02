@@ -59,4 +59,15 @@ class TestBasicParsing < Test::Unit::TestCase
 		assert_equal "\n<a/>\n",Parser.node_content(script,code)
 	end
 
+	def test_text_blocks
+		code = "<html><head><div type='text/ng-template' id='sliding-puzzle'>ciao<a/>come</div></head></html>"
+		r = Html.raw_node_tree(code)
+		assert_equal 0,r.child_elements[0].text_blocks(code).count
+		assert_equal 0,r.child_elements[0].child_elements[0].text_blocks(code).count
+		div = r.child_elements[0].child_elements[0].child_elements[0]	
+		assert_equal 2,div.text_blocks(code).count
+		assert_equal "ciao",div.text_blocks(code)[0].value
+		assert_equal "come",div.text_blocks(code)[1].value
+	end
+
 end
