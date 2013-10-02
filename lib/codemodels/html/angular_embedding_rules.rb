@@ -25,6 +25,9 @@ def self.parser_considering_angular_embedded_code
 
 	p = Parser.new
 	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n,code|
+		n.name=='ng-app' ? n.value : nil
+	end
+	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n,code|
 		n.name=='ng-repeat' ? n.value : nil
 	end
 	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n,code|
