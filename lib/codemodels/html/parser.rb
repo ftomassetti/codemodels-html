@@ -24,7 +24,7 @@ module CodeModels
 module Html
 
 	def self.absolute_pos_to_position(abspos,code)
-		p = CodeModels::Position.new
+		p = CodeModels::SourcePoint.new
 		count = 0
 		ln = nil
 		cn = nil
@@ -45,6 +45,16 @@ module Html
 class TextBlock
 	attr_accessor :source
 	attr_accessor :value
+
+	def set_begin_point(data)
+		@source = SourceInfo.new unless @source
+		@source.set_begin_point(data)
+	end
+
+	def set_end_point(data)
+		@source = SourceInfo.new unless @source
+		@source.set_end_point(data)		
+	end	
 end
 
 class Java::NetHtmlparserJericho::Element 
@@ -56,10 +66,8 @@ class Java::NetHtmlparserJericho::Element
 			unless text==nil or text.strip.empty?
 				block = TextBlock.new
 				block.value = text
-
-				block.source = CodeModels::SourceInfo.new
-				block.source.begin_pos = Html.absolute_pos_to_position(s,code)
-				block.source.end_pos   = Html.absolute_pos_to_position(e,code)
+				block.set_begin_point Html.absolute_pos_to_position(s,code)
+				block.set_end_point   Html.absolute_pos_to_position(e,code)
 
 				blocks << block
 			end
@@ -156,8 +164,9 @@ class Parser < CodeModels::Parser
 		return if model==nil
 		model.language = LANGUAGE
 		model.source = CodeModels::SourceInfo.new
-		model.source.begin_pos = Html.absolute_pos_to_position(node.begin,code)
-		model.source.end_pos   = Html.absolute_pos_to_position(node.end,code)
+		model.source.position = CodeModels::SourcePosition.new
+		model.source.position.begin_point = Html.absolute_pos_to_position(node.begin,code)
+		model.source.position.end_point   = Html.absolute_pos_to_position(node.end,code)
 	end
 
 	def analyze_content(model,node,code)

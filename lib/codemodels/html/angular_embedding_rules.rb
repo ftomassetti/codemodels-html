@@ -8,9 +8,6 @@ require 'codemodels/js'
 module CodeModels
 module Html
 
-CodeModels.enable_foreign_asts(Attribute)
-CodeModels.enable_foreign_asts(Node)
-
 module AngularJs
 
 def self.parser_considering_angular_embedded_code

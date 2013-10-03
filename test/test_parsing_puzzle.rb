@@ -49,7 +49,7 @@ class TestParsingPuzzle < Test::Unit::TestCase
 	def test_js_names_title
 		code = IO.read('test/data/puzzle.html')
 		r = AngularJs.parser_considering_angular_embedded_code.parse_code(code)
-		jstitles = r.all_children_deep.select {|n| n.is_a?(CodeModels::Js::Name) && n.identifier=='title'}
+		jstitles = CodeModels.all_children_deep_also_foreign(r).select {|n| n.is_a?(CodeModels::Js::Name) && n.identifier=='title'}
 		assert_equal 2,jstitles.count
 	end
 

@@ -23,14 +23,14 @@ class TestBasicInfo < Test::Unit::TestCase
 		span = nil
 		r.traverse {|n| span = n if n.is_a?(Node) && n.name=='span'}
 		assert_not_nil span
-		assert_equal 8,span.source.begin_pos.line
+		assert_equal 8,span.source.position.begin_point.line
 		assert_class Node, span.eContainer
 		assert_equal 'p',span.eContainer.name
-		assert_equal 7,span.eContainer.source.begin_pos.line # p
+		assert_equal 7,span.eContainer.source.position.begin_point.line # p
 		assert_equal 'div',span.eContainer.eContainer.name
-		assert_equal 7,span.eContainer.eContainer.source.begin_pos.line # div
+		assert_equal 7,span.eContainer.eContainer.source.position.begin_point.line # div
 		assert_equal 'body',span.eContainer.eContainer.eContainer.name
-		assert_equal 2,span.eContainer.eContainer.eContainer.source.begin_pos.line # body
+		assert_equal 2,span.eContainer.eContainer.eContainer.source.position.begin_point.line # body
 	end
 
 	def test_source_line_of_text_elements
@@ -53,8 +53,8 @@ class TestBasicInfo < Test::Unit::TestCase
 		first_p = body.all_children[0]
 		first_p_text = first_p.all_children[0]
 		assert_class Text,first_p_text
-		assert_equal 3,first_p_text.source.begin_pos.line
-		assert_equal 5,first_p_text.source.end_pos.line
+		assert_equal 3,first_p_text.source.position.begin_point.line
+		assert_equal 5,first_p_text.source.position.end_point.line
 	end	
 
 end
