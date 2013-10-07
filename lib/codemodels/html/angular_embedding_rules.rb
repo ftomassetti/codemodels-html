@@ -10,48 +10,50 @@ module Html
 
 module AngularJs
 
+def self.attribute_value_pos(code,n)
+	bi = n.getValueSegment.begin
+	ei = n.getValueSegment.end-1
+	#puts "ATTVALUE<<#{code[bi..ei]}>>"
+	SourcePosition.from_code_indexes(code,bi,ei)
+end
+
 def self.parser_considering_angular_embedded_code
 	js_parser = CodeModels::Js::DefaultParser
 	js_expression_parser = CodeModels::Js::ExpressionParser
 
 	p = Parser.new
 	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n,code|
-		n.name=='ng-app' ? n.value : nil
+		n.name=='ng-app' ? attribute_value_pos(code,n) : nil
 	end
 	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n,code|
-		n.name=='ng-repeat' ? n.value : nil
+		n.name=='ng-repeat' ? attribute_value_pos(code,n) : nil
 	end
 	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n,code|
-		n.name=='ng-show' ? n.value : nil
+		n.name=='ng-show' ? attribute_value_pos(code,n) : nil
 	end
 	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n,code|
-		n.name=='ng-class' ? n.value : nil
+		n.name=='ng-class' ? attribute_value_pos(code,n) : nil
 	end	
 	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n,code|
-		n.name=='ng-model' ? n.value : nil
+		n.name=='ng-model' ? attribute_value_pos(code,n) : nil
 	end	
 	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n,code|
-		n.name=='ng-click' ? n.value : nil
+		n.name=='ng-click' ? attribute_value_pos(code,n) : nil
 	end			
 	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n,code|
-		n.name=='ng-include' ? n.value : nil
+		n.name=='ng-include' ? attribute_value_pos(code,n) : nil
 	end		
-	# p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n,code|
-	# 	if n.name=='ng-href'
-	# 		raise "Expected to start with '#/{{', instead '#{n.value}'" unless n.value.start_with?('#/{{')
-	# 		raise "Expected to end with '}}', instead '#{n.value}'" unless n.value.end_with?('}}')
-	# 		n.value.remove_prefix('#/{{').remove_postfix('}}')
-	# 	else
-	# 		nil
-	# 	end
-	# end
+
 	p.register_embedded_parser(Java::NetHtmlparserJericho::Element,js_expression_parser) do |n,code|		
 		res = []
 		if n.name!='script'
-			n.text_blocks(code).each do |tb|			
+			n.text_blocks(code).each do |tb|	
+				tb_start = tb.source.position.begin_point.to_absolute_index(code)	
 				tb.value.scan( /\{\{[^\}]*\}\}/ ).each do |content|		
-					#puts "FROM ELEMENT <<<#{n}>>> '#{content}'"
-					res << content.remove_prefix('{{').remove_postfix('}}')
+					start_index = $~.offset(0)[0]+2+tb_start
+					end_index   = start_index+content.length-5
+					#puts "ELEMENT<<#{code[start_index..end_index]}>>"
+					res << SourcePosition.from_code_indexes(code,start_index,end_index)
 				end
 			end
 		end
@@ -59,10 +61,13 @@ def self.parser_considering_angular_embedded_code
 	end
 	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n,code|
 		content = n.value
+		bi = n.getValueSegment.begin
 		res = []
 		content.scan( /\{\{[^\}]*\}\}/ ).each do |content|			
-			#puts "FROM ATTRIBUTE <<<#{n}>>> '#{content}'"
-			res << content.remove_prefix('{{').remove_postfix('}}')
+			start_index = $~.offset(0)[0]+2+bi
+			end_index   = start_index+content.length-5	
+			#puts "ATTRIBUTE<<#{code[start_index..end_index]}>>"		
+			res << SourcePosition.from_code_indexes(code,start_index,end_index)
 		end
 		res
 	end	

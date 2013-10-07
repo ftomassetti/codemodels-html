@@ -62,12 +62,13 @@ class Java::NetHtmlparserJericho::Element
 	def text_blocks(code)
 		blocks = []
 		break_content(self,code).each do |s,e|
-			text = code[s,e-s]
+			text = code[s,e-s]			
 			unless text==nil or text.strip.empty?
+				#puts "<<<#{text}>>>"
 				block = TextBlock.new
 				block.value = text
-				block.begin_point =  Html.absolute_pos_to_position(s,code)
-				block.end_point =  Html.absolute_pos_to_position(e,code)
+				block.source = SourceInfo.new
+				block.source.position = SourcePosition.from_code_indexes(code,s,e-1)
 
 				blocks << block
 			end
@@ -136,7 +137,7 @@ class Parser < CodeModels::Parser
 	end
 
 	def parse_code(code,artifact=nil)
-		artifact = FileArtifact.new '<unnamed file>' unless artifact
+		artifact = FileArtifact.new('<unnamed file>',code) unless artifact
 		source = raw_node_tree(code)
 		node_to_model(source,code,artifact)
 	end
@@ -229,14 +230,18 @@ class Parser < CodeModels::Parser
 		@embedded_parsers[node.class].each do |ep|
 			selector = ep[:selector]
 			embedded_parser = ep[:embedded_parser]
-			embedded_code = selector.call(node,code)
-			if embedded_code
-				unless embedded_code.is_a?(Array)
-					embedded_code = [embedded_code]
+			embedded_position = selector.call(node,code)
+			if embedded_position
+				unless embedded_position.is_a?(Array)
+					embedded_position = [embedded_position]
 				end
-				embedded_code.each do |ec|
-					embedded_root = embedded_parser.parse_code(ec)
-					#embedded_root.eContainer = nil
+				embedded_position.each do |ep|
+					embedded_code = ep.get_string(code)
+					begin
+						embedded_root = embedded_parser.parse_code(embedded_code)
+					rescue Exception => e
+						raise "Problem parsing '#{embedded_code}', from position #{ep}: #{e}"
+					end
 					model.addForeign_asts(embedded_root)
 				end
 			end
@@ -266,7 +271,7 @@ def self.parse_code(code)
 end
 
 def self.parse_file(code,filename)
-	parse_artifact(code,FileArtifact.new(filename))
+	parse_artifact(code,FileArtifact.new(filename,code))
 end
 
 def self.raw_node_tree(code)
