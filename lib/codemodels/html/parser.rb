@@ -136,10 +136,13 @@ class Parser < CodeModels::Parser
 		source
 	end
 
-	def parse_code(code,artifact=nil)
-		artifact = FileArtifact.new('<unnamed file>',code) unless artifact
-		source = raw_node_tree(code)
-		node_to_model(source,code,artifact)
+	def parse_code(code)
+		parse_artifact(FileArtifact.new('<code>',code))
+	end
+
+	def parse_artifact(artifact)
+		source = raw_node_tree(artifact.code)
+		node_to_model(source,artifact.code,artifact)
 	end
 
 	# It operates on original node, not on the model obtained because
@@ -150,14 +153,18 @@ class Parser < CodeModels::Parser
 	end
 
 	def self.node_content(node,code)
+		pos = node_content_pos(node,code)
+		code[pos[0]..pos[1]]
+	end
+
+	def self.node_content_pos(node,code)
 		text_inside = code[(node.begin)..(node.end)]
 		i  = text_inside.first_index('>') 
 		start_index = node.begin+i+1
 		li = text_inside.last_index('<')
-		end_index    = node.begin+li
-		content = code[start_index,end_index-start_index]
-		content = "" unless content
-		content
+		end_index    = node.begin+li-1
+		#content = code[start_index,end_index-start_index]
+		[start_index,end_index]
 	end
 
 	private
@@ -200,8 +207,16 @@ class Parser < CodeModels::Parser
 				model = Html::Script.new	
 				model.name = node.name			
 				if node.attributes.get('type') && node.attributes.get('type').value=='text/ng-template'
-					content = Parser.node_content(node,code)
-					script_doc = parse_code(content,artifact)				
+					content_pos = Parser.node_content_pos(node,code)
+					#raise "mismatch" unless content==embedded_artifact.code
+					embedded_artifact = EmbeddedArtifact.new
+					embedded_artifact.host_artifact = artifact
+					si = content_pos[0]
+					while code[si]==' '||code[si]=="\t"||code[si]=="\r"||code[si]=="\n"
+						si+=1
+					end
+					embedded_artifact.position_in_host = SourcePosition.from_code_indexes(code,si,content_pos[1])
+					script_doc = parse_artifact(embedded_artifact)				
 					model.addForeign_asts script_doc
 				end
 			else			
@@ -222,11 +237,11 @@ class Parser < CodeModels::Parser
 		end
 
 		add_source_info(node,model,code,artifact)
-		check_foreign_parser(node,code,model)
+		check_foreign_parser(node,code,model,artifact)
 		model
 	end
 
-	def check_foreign_parser(node,code,model)
+	def check_foreign_parser(node,code,model,artifact)
 		@embedded_parsers[node.class].each do |ep|
 			selector = ep[:selector]
 			embedded_parser = ep[:embedded_parser]
@@ -236,11 +251,14 @@ class Parser < CodeModels::Parser
 					embedded_position = [embedded_position]
 				end
 				embedded_position.each do |ep|
-					embedded_code = ep.get_string(code)
+					embedded_artifact = EmbeddedArtifact.new
+					embedded_artifact.host_artifact = artifact
+					embedded_artifact.position_in_host = ep
+					#puts "<<<#{embedded_code}>>> #{ep}"
 					begin
-						embedded_root = embedded_parser.parse_code(embedded_code)
+						embedded_root = embedded_parser.parse_artifact(embedded_artifact)
 					rescue Exception => e
-						raise "Problem parsing '#{embedded_code}', from position #{ep}: #{e}"
+						raise "Problem embedded in '#{node}' at #{model.source.position} parsing '#{embedded_artifact.code}', from position #{ep}: #{e}"
 					end
 					model.addForeign_asts(embedded_root)
 				end
@@ -262,8 +280,8 @@ end # class Parser
 
 DefaultParser = Parser.new
 
-def self.parse_artifact(code,artifact)
-	DefaultParser.parse_code(code,artifact)
+def self.parse_artifact(artifact)
+	DefaultParser.parse_artifact(artifact)
 end
 
 def self.parse_code(code)
@@ -271,7 +289,7 @@ def self.parse_code(code)
 end
 
 def self.parse_file(code,filename)
-	parse_artifact(code,FileArtifact.new(filename,code))
+	parse_artifact(FileArtifact.new(filename,code))
 end
 
 def self.raw_node_tree(code)

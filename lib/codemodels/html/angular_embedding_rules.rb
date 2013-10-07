@@ -13,7 +13,7 @@ module AngularJs
 def self.attribute_value_pos(code,n)
 	bi = n.getValueSegment.begin
 	ei = n.getValueSegment.end-1
-	#puts "ATTVALUE<<#{code[bi..ei]}>>"
+	#puts "ATTVALUE<<#{code[bi...ei]}>> #{SourcePosition.from_code_indexes(code,bi,ei)} @@@#{code}@@@"
 	SourcePosition.from_code_indexes(code,bi,ei)
 end
 
@@ -52,7 +52,7 @@ def self.parser_considering_angular_embedded_code
 				tb.value.scan( /\{\{[^\}]*\}\}/ ).each do |content|		
 					start_index = $~.offset(0)[0]+2+tb_start
 					end_index   = start_index+content.length-5
-					#puts "ELEMENT<<#{code[start_index..end_index]}>>"
+					#puts "ELEMENT<<#{code[start_index..end_index]}>> #{SourcePosition.from_code_indexes(code,start_index,end_index)}"
 					res << SourcePosition.from_code_indexes(code,start_index,end_index)
 				end
 			end
