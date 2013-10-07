@@ -135,9 +135,10 @@ class Parser < CodeModels::Parser
 		source
 	end
 
-	def parse_code(code)
+	def parse_code(code,artifact=nil)
+		artifact = FileArtifact.new '<unnamed file>' unless artifact
 		source = raw_node_tree(code)
-		node_to_model(source,code)
+		node_to_model(source,code,artifact)
 	end
 
 	# It operates on original node, not on the model obtained because
@@ -160,10 +161,11 @@ class Parser < CodeModels::Parser
 
 	private
 
-	def add_source_info(node,model,code)
+	def add_source_info(node,model,code,artifact)
 		return if model==nil
 		model.language = LANGUAGE
 		model.source = CodeModels::SourceInfo.new
+		model.source.artifact = artifact
 		model.source.position = CodeModels::SourcePosition.new
 		model.source.position.begin_point = Html.absolute_pos_to_position(node.begin,code)
 		model.source.position.end_point   = Html.absolute_pos_to_position(node.end,code)
@@ -181,10 +183,10 @@ class Parser < CodeModels::Parser
 		end
 	end
 
-	def node_to_model(node,code)
+	def node_to_model(node,code,artifact)
 		if node.is_a? Java::NetHtmlparserJericho::Source
 			model = Html::HtmlDocument.new
-			translate_many(code,node,model,:children,node.child_elements)
+			translate_many(code,node,model,:children,node.child_elements,artifact)
 			model
 		elsif node.is_a? Java::NetHtmlparserJericho::Element
 			if node.name=='!doctype'
@@ -198,16 +200,16 @@ class Parser < CodeModels::Parser
 				model.name = node.name			
 				if node.attributes.get('type') && node.attributes.get('type').value=='text/ng-template'
 					content = Parser.node_content(node,code)
-					script_doc = parse_code(content)				
+					script_doc = parse_code(content,artifact)				
 					model.addForeign_asts script_doc
 				end
 			else			
 				model = Html::Node.new
 				analyze_content(model,node,code)
 				model.name = node.name		
-				translate_many(code,node,model,:children,node.child_elements)
+				translate_many(code,node,model,:children,node.child_elements,artifact)
 			end		
-			translate_many(code,node,model,:attributes)
+			translate_many(code,node,model,:attributes,artifact)
 			model	
 		elsif node.is_a? Java::NetHtmlparserJericho::Attribute
 			model = Html::Attribute.new
@@ -218,7 +220,7 @@ class Parser < CodeModels::Parser
 			raise "Unknown node class: #{node.class}"
 		end
 
-		add_source_info(node,model,code)
+		add_source_info(node,model,code,artifact)
 		check_foreign_parser(node,code,model)
 		model
 	end
@@ -241,12 +243,12 @@ class Parser < CodeModels::Parser
 		end
 	end
 
-	def translate_many(code,node,model,dest,node_value=(node.send(dest)))
+	def translate_many(code,node,model,dest,node_value=(node.send(dest)),artifact)
 		return unless node_value!=nil
 		#puts "Considering #{model.class}.#{dest} (#{node_value.class})"
 		node_value.each do |el|
 			#puts "\t* #{el.class}"
-			model_el = node_to_model(el,code)
+			model_el = node_to_model(el,code,artifact)
 			model.send(:"add#{dest.to_s.proper_capitalize}", model_el) if model_el!=nil
 		end
 	end
@@ -255,8 +257,16 @@ end # class Parser
 
 DefaultParser = Parser.new
 
+def self.parse_artifact(code,artifact)
+	DefaultParser.parse_code(code,artifact)
+end
+
 def self.parse_code(code)
-	DefaultParser.parse_code(code)
+	parse_file(code,'<code>')
+end
+
+def self.parse_file(code,filename)
+	parse_artifact(code,FileArtifact.new(filename))
 end
 
 def self.raw_node_tree(code)
