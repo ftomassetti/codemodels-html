@@ -234,7 +234,7 @@ class Parser < CodeModels::Parser
 				end
 				embedded_code.each do |ec|
 					embedded_root = embedded_parser.parse_code(ec)
-					embedded_root.eContainer = nil
+					#embedded_root.eContainer = nil
 					model.addForeign_asts(embedded_root)
 				end
 			end
