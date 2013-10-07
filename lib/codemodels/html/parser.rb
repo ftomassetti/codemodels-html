@@ -46,14 +46,14 @@ class TextBlock
 	attr_accessor :source
 	attr_accessor :value
 
-	def set_begin_point(data)
+	def begin_point=(data)
 		@source = SourceInfo.new unless @source
-		@source.set_begin_point(data)
+		@source.begin_point= data
 	end
 
-	def set_end_point(data)
+	def end_point=(data)
 		@source = SourceInfo.new unless @source
-		@source.set_end_point(data)		
+		@source.end_point= data
 	end	
 end
 
@@ -66,8 +66,8 @@ class Java::NetHtmlparserJericho::Element
 			unless text==nil or text.strip.empty?
 				block = TextBlock.new
 				block.value = text
-				block.set_begin_point Html.absolute_pos_to_position(s,code)
-				block.set_end_point   Html.absolute_pos_to_position(e,code)
+				block.begin_point =  Html.absolute_pos_to_position(s,code)
+				block.end_point =  Html.absolute_pos_to_position(e,code)
 
 				blocks << block
 			end
