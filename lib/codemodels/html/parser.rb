@@ -179,13 +179,14 @@ class Parser < CodeModels::Parser
 		model.source.position.end_point   = Html.absolute_pos_to_position(node.end,code)
 	end
 
-	def analyze_content(model,node,code)
+	def analyze_content(model,node,code,artifact)
 		node.text_blocks(code).each do |tb|
 			t = Html::Text.new
 			t.value = tb.value
 
 			t.language = LANGUAGE
 			t.source = tb.source
+			t.source.artifact = artifact
 
 			model.addChildren(t)
 		end
@@ -221,7 +222,7 @@ class Parser < CodeModels::Parser
 				end
 			else			
 				model = Html::Node.new
-				analyze_content(model,node,code)
+				analyze_content(model,node,code,artifact)
 				model.name = node.name		
 				translate_many(code,node,model,:children,node.child_elements,artifact)
 			end		
