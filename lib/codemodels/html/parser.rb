@@ -105,7 +105,8 @@ class Parser < CodeModels::Parser
 	end
 
 	def parse_file(path)
-		parse_code(IO.read(path))
+		code = IO.read(path)
+		parse_artifact(FileArtifact.new(path,code))
 	end
 
 	def raw_node_tree(code)

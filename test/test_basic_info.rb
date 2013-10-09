@@ -57,4 +57,11 @@ class TestBasicInfo < Test::Unit::TestCase
 		assert_equal 5,first_p_text.source.position.end_point.line
 	end	
 
+	def test_artifact_final_host_is_set_correctly_for_all
+		r = AngularJs.parser_considering_angular_embedded_code.parse_file('test/data/puzzle.html')
+		r.traverse(:also_foreign) do |n|
+			assert_equal 'test/data/puzzle.html',n.source.artifact.final_host.filename, "Node with wrong final_host: #{n}"
+		end
+	end
+
 end
