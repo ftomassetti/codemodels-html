@@ -23,7 +23,7 @@ class TestInfoExtraction < Test::Unit::TestCase
 
 	def test_no_extraneous_values
 		code = IO.read('test/data/puzzle.html')
-		r = Html.parse_code(code)
+		r = Html::AngularJs.parser_considering_angular_embedded_code.parse_code(code)
 		r.traverse(:also_foreign) do |node|
 			node.collect_values_with_count.each do |value,count|
 				node_code = node.source.code
