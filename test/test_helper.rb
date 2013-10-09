@@ -67,8 +67,6 @@ end
 
 def assert_code_map_to(code,exp)
 	r = Html.parse_code(code)
-	#ser = CodeModels::Serialization.jsonize_obj(r)
-	#puts "Code <<<#{code}>>> -> #{JSON.pretty_generate(ser)}"
 	map = r.values_map
 	assert_map(exp,map)
 end

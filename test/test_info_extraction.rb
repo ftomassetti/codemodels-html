@@ -21,4 +21,17 @@ class TestInfoExtraction < Test::Unit::TestCase
 		})		
 	end
 
+	def test_no_extraneous_values
+		code = IO.read('test/data/puzzle.html')
+		r = Html.parse_code(code)
+		r.traverse(:also_foreign) do |node|
+			node.collect_values_with_count.each do |value,count|
+				node_code = node.source.code
+				unless node_code.include?(value.to_s)
+					fail("Value '#{value}' expected in #{node}. Artifact: #{node.source.artifact}, abspos: #{node.source.position(:absolute)}, code: '#{node_code}'")
+				end
+			end
+		end
+	end
+
 end

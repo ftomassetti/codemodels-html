@@ -23,25 +23,6 @@ end
 module CodeModels
 module Html
 
-	def self.absolute_pos_to_position(abspos,code)
-		p = CodeModels::SourcePoint.new
-		count = 0
-		ln = nil
-		cn = nil
-		code.lines.each_with_index do |l,i|
-			count+=l.length
-			if count>=abspos
-				ln = i
-				cn = abspos-l.length-count
-				break
-			end
-		end
-		raise "It should not be nil: abs pos #{abspos}, code length #{code.length}" unless ln
-		p.line   = ln+1
-		p.column = cn+1
-		p
-	end
-
 class TextBlock
 	attr_accessor :source
 	attr_accessor :value
@@ -174,9 +155,7 @@ class Parser < CodeModels::Parser
 		model.language = LANGUAGE
 		model.source = CodeModels::SourceInfo.new
 		model.source.artifact = artifact
-		model.source.position = CodeModels::SourcePosition.new
-		model.source.position.begin_point = Html.absolute_pos_to_position(node.begin,code)
-		model.source.position.end_point   = Html.absolute_pos_to_position(node.end,code)
+		model.source.position = SourcePosition.from_code_indexes(code,node.begin,node.end)
 	end
 
 	def analyze_content(model,node,code,artifact)
