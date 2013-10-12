@@ -92,4 +92,39 @@ class TestParsingPuzzle < Test::Unit::TestCase
 		assert_equal 'title',jstitles[1].source.code
 	end
 
+	def test_position_of_embedded_js
+		code = %q{<!DOCTYPE html>
+<html>
+<body ng-app="puzzleApp">
+	<ul id="types">
+		<li ng-repeat="t in types" ng-class="{'selected': t.id == type}">
+			<a ng-href="#/{{t.id}}">{{t.title}}</a>
+		</li>
+	</ul>
+
+	<div ng-include="type">
+		</div>
+		</body>
+		</html>}
+		r = AngularJs.parser_considering_angular_embedded_code.parse_code(code)
+		jsNames = r.all_children_deep(:also_foreign).select{|n|n.class==CodeModels::Js::Name}
+		assert_equal 'puzzleApp',jsNames[0].identifier
+		assert_equal 3,jsNames[0].source.position(:absolute).begin_line
+		ts     = jsNames.select{|n|n.identifier=='t'}
+		types  = jsNames.select{|n|n.identifier=='types'}
+		ids    = jsNames.select{|n|n.identifier=='id'}
+		typess = jsNames.select{|n|n.identifier=='type'}
+		titles = jsNames.select{|n|n.identifier=='title'}
+		assert_equal 4,ts.count
+		assert_equal [5,5,6,6],ts.map{|n| n.source.position(:absolute).begin_line}
+		assert_equal 1,types.count
+		assert_equal [5],types.map{|n| n.source.position(:absolute).begin_line}
+		assert_equal 2,ids.count
+		assert_equal [5,6],ids.map{|n| n.source.position(:absolute).begin_line}
+		assert_equal 2,typess.count
+		assert_equal [5,10],typess.map{|n| n.source.position(:absolute).begin_line}
+		assert_equal 1,titles.count
+		assert_equal [6],titles.map{|n| n.source.position(:absolute).begin_line}
+	end
+
 end
