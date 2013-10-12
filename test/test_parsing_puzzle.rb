@@ -127,4 +127,12 @@ class TestParsingPuzzle < Test::Unit::TestCase
 		assert_equal [6],titles.map{|n| n.source.position(:absolute).begin_line}
 	end
 
+	def test_double_elements_in_html_attribute_are_parsed
+		code = '<html><sliding-puzzle api="puzzle.api" size="{{puzzle.rows}}x{{puzzle.cols}}" src="{{puzzle.src}}"></sliding-puzzle></html>'
+		r = AngularJs.parser_considering_angular_embedded_code.parse_code(code)
+		jsNames = r.all_children_deep(:also_foreign).select{|n|n.class==CodeModels::Js::Name}
+		assert_not_nil jsNames.find{|n| n.identifier=='rows'}
+		assert_not_nil jsNames.find{|n| n.identifier=='cols'}
+	end
+
 end
