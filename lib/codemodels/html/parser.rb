@@ -239,7 +239,7 @@ class Parser < CodeModels::Parser
 					begin
 						embedded_root = embedded_parser.parse_artifact(embedded_artifact)
 					rescue Exception => e
-						raise "Problem embedded in '#{node}' at #{model.source.position} parsing '#{embedded_artifact.code}', from position #{ep}: #{e}"
+						raise "Problem embedded in '#{node}' at #{model.source.position} parsing '#{embedded_artifact.code}', from position #{ep}: #{e.inspect}"
 					end
 					model.addForeign_asts(embedded_root)
 				end

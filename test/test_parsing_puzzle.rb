@@ -92,6 +92,38 @@ class TestParsingPuzzle < Test::Unit::TestCase
 		assert_equal 'title',jstitles[1].source.code
 	end
 
+	def test_position_of_embedded_js_verify_t_1
+		code = %q{<!DOCTYPE html><html><li ng-repeat="t in types"></html>}
+		r = AngularJs.parser_considering_angular_embedded_code.parse_code(code)
+		jsNames = r.all_children_deep(:also_foreign).select{|n|n.class==CodeModels::Js::Name}
+		ts = jsNames.select{|n|n.identifier=='t'}
+		assert_equal 1, ts.count
+	end
+
+	def test_position_of_embedded_js_verify_t_2
+		code = %q{<!DOCTYPE html><html><li ng-class="{'selected': t.id == type}"></html>}
+		r = AngularJs.parser_considering_angular_embedded_code.parse_code(code)
+		jsNames = r.all_children_deep(:also_foreign).select{|n|n.class==CodeModels::Js::Name}
+		ts = jsNames.select{|n|n.identifier=='t'}
+		assert_equal 1, ts.count
+	end
+
+	def test_position_of_embedded_js_verify_t_3
+		code = %q{<!DOCTYPE html><html><a ng-href="#/{{t.id}}"/></html>}
+		r = AngularJs.parser_considering_angular_embedded_code.parse_code(code)
+		jsNames = r.all_children_deep(:also_foreign).select{|n|n.class==CodeModels::Js::Name}
+		ts = jsNames.select{|n|n.identifier=='t'}
+		assert_equal 1, ts.count
+	end
+
+	def test_position_of_embedded_js_verify_t_4
+		code = %q{<!DOCTYPE html><html><a>{{t.title}}</a></html>}
+		r = AngularJs.parser_considering_angular_embedded_code.parse_code(code)
+		jsNames = r.all_children_deep(:also_foreign).select{|n|n.class==CodeModels::Js::Name}
+		ts = jsNames.select{|n|n.identifier=='t'}
+		assert_equal 1, ts.count
+	end			
+
 	def test_position_of_embedded_js
 		code = %q{<!DOCTYPE html>
 <html>
