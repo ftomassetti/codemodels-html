@@ -44,4 +44,11 @@ class TestParsingEmbeddedLanguages < Test::Unit::TestCase
 		assert_equal 1,att_src.foreign_asts.count
 	end
 
+	def test_parsing_empty_attr
+		code = %q{<sliding-puzzle api />}
+
+		r = @p.parse_code(code)
+		# it does not crash? It is ok!
+	end	
+
 end

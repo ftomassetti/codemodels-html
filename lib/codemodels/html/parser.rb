@@ -1,24 +1,7 @@
 require 'jars/jericho-html-3.3.jar'
 require 'codemodels'
+require 'codemodels/html/monkey_patching'
 
-class ::String
-
-	def first_index(sub)
-		(0...(self.length-1)).each do |i|
-			return i if self[i,self.length-1].start_with?(sub)
-		end
-		nil
-	end
-
-	def last_index(sub)
-		last = nil
-		(0...(self.length-1)).each do |i|
-			last=i if self[i,self.length-1].start_with?(sub)
-		end
-		last
-	end	
-
-end
 
 module CodeModels
 module Html
@@ -63,7 +46,10 @@ class Java::NetHtmlparserJericho::Element
 		text_inside = code[(node.begin)..(node.end)]
 		#puts "Text inside #{node.name} ^#{text_inside}^ It has child elements #{node.child_elements}"
 		i  = text_inside.first_index('>') 
+		raise "No '>' found in node #{node}, text inside: '#{text_inside}'" unless i
 		#puts "Index i: #{i}"
+		raise "No Fixnum" unless node.begin.is_a?(Fixnum)
+		raise "No Fixnum" unless i.is_a?(Fixnum)
 		start_index = node.begin+i+1
 		li = text_inside.last_index('<')
 		#puts "Index li: #{li}"
@@ -140,11 +126,12 @@ class Parser < CodeModels::Parser
 	end
 
 	def self.node_content_pos(node,code)
-		text_inside = code[(node.begin)..(node.end)]
+		text_inside = code[(node.begin)...(node.end)]
 		i  = text_inside.first_index('>') 
 		start_index = node.begin+i+1
 		li = text_inside.last_index('<')
 		end_index    = node.begin+li-1
+		raise "problem" if start_index>end_index
 		#content = code[start_index,end_index-start_index]
 		[start_index,end_index]
 	end
@@ -186,8 +173,12 @@ class Parser < CodeModels::Parser
 				model		
 			elsif node.name=='script'
 				model = Html::Script.new	
-				model.name = node.name			
-				if node.attributes.get('type') && node.attributes.get('type').value=='text/ng-template'
+				model.name = node.name
+				# something is obfuscating the attributes method... damn...
+				attributes_method = node.java_method(:getAttributes)
+				attributes = attributes_method.call		
+				raise "Error, Attributes expected, instead it is '#{attributes.class}'. Node class #{node.class}" unless attributes.is_a?(Java::NetHtmlparserJericho::Attributes)
+				if attributes.get('type') && attributes.get('type').value=='text/ng-template'
 					content_pos = Parser.node_content_pos(node,code)
 					#raise "mismatch" unless content==embedded_artifact.code
 					embedded_artifact = EmbeddedArtifact.new

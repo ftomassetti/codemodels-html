@@ -11,8 +11,8 @@ module Html
 module AngularJs
 
 def self.attribute_value_pos(code,n)
-	bi = n.getValueSegment.begin
-	ei = n.getValueSegment.end-1
+	bi = n.java_method(:getValueSegment).call.begin
+	ei = n.java_method(:getValueSegment).call.end-1
 	#puts "ATTVALUE<<#{code[bi...ei]}>> #{SourcePosition.from_code_indexes(code,bi,ei)} @@@#{code}@@@"
 	SourcePosition.from_code_indexes(code,bi,ei)
 end
@@ -56,8 +56,12 @@ def self.parser_considering_angular_embedded_code
 	end
 	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n,code|
 		content = n.value
-		bi = n.getValueSegment.begin
-		instances_of_escaped_text(code,content,bi)
+		if n.getValueSegment
+			bi = n.getValueSegment.begin
+			instances_of_escaped_text(code,content,bi)
+		else
+			[]
+		end
 	end	
 	p
 end
