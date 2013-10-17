@@ -43,7 +43,7 @@ class Java::NetHtmlparserJericho::Element
 	private
 
 	def break_content(node,code)
-		text_inside = code[(node.begin)..(node.end)]
+		text_inside = code[(node.begin)...(node.end)]
 		#puts "Text inside #{node.name} ^#{text_inside}^ It has child elements #{node.child_elements}"
 		i  = text_inside.first_index('>') 
 		raise "No '>' found in node #{node}, text inside: '#{text_inside}'" unless i
@@ -148,6 +148,7 @@ class Parser < CodeModels::Parser
 
 	def analyze_content(model,node,code,artifact)
 		node.text_blocks(code).each do |tb|
+			raise "GOTCHA #{node.name} TEXT INSIDE '#{code[(node.begin)..(node.end)]}'" if (tb.value=='</head>')
 			t = Html::Text.new
 			t.value = tb.value
 

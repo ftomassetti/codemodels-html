@@ -41,11 +41,16 @@ class TestBasicParsing < Test::Unit::TestCase
 		assert_equal 'html', dtd.name
 	end
 
+	def test_no_text_blocks
+		code = "<head><script type='text/ng-template' id='sliding-puzzle'>\n<a/>\n</script></head>"
+		r = Html.raw_node_tree(code)
+		assert_equal 0,r.child_elements[0].text_blocks(code).count
+	end
+
 	def test_parse_scripts
 		code = "<html><head><script type='text/ng-template' id='sliding-puzzle'>\n<a/>\n</script></head></html>"
 		r = Html.parse_code(code)
 		script = r.children[0].children[0].children[0]		
-		puts "TEXT '#{script.value}'"
 		assert_class Script, script
 		assert_class HtmlDocument, script.foreign_asts[0]
 		assert_class Node, script.foreign_asts[0].children[0]
