@@ -22,27 +22,17 @@ def self.parser_considering_angular_embedded_code
 	js_expression_parser = CodeModels::Js::ExpressionParser
 
 	p = Parser.new
-	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n,code|
-		n.name=='ng-app' ? attribute_value_pos(code,n) : nil
+
+	ng_attribute_base_names = 'app','repeat','show','class','model','click','include'
+	ng_attribute_names = []
+	ng_attribute_base_names.each do |n|
+		ng_attribute_names<<"ng:#{n}"
+		ng_attribute_names<<"ng-#{n}"
 	end
+
 	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n,code|
-		n.name=='ng-repeat' ? attribute_value_pos(code,n) : nil
+		ng_attribute_names.include?(n.name) ? attribute_value_pos(code,n) : nil
 	end
-	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n,code|
-		n.name=='ng-show' ? attribute_value_pos(code,n) : nil
-	end
-	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n,code|
-		n.name=='ng-class' ? attribute_value_pos(code,n) : nil
-	end	
-	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n,code|
-		n.name=='ng-model' ? attribute_value_pos(code,n) : nil
-	end	
-	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n,code|
-		n.name=='ng-click' ? attribute_value_pos(code,n) : nil
-	end			
-	p.register_embedded_parser(Java::NetHtmlparserJericho::Attribute,js_expression_parser) do |n,code|
-		n.name=='ng-include' ? attribute_value_pos(code,n) : nil
-	end		
 
 	p.register_embedded_parser(Java::NetHtmlparserJericho::Element,js_expression_parser) do |n,code|		
 		res = []
