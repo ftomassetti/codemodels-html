@@ -1,3 +1,4 @@
+require 'java'
 require 'jars/jericho-html-3.3.jar'
 require 'codemodels'
 require 'codemodels/html/monkey_patching'
@@ -20,7 +21,7 @@ class TextBlock
 	end	
 end
 
-class Java::NetHtmlparserJericho::Element 
+class ::Java::NetHtmlparserJericho::Element 
 
 	def text_blocks(code)
 		blocks = []
