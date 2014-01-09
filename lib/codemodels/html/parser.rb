@@ -2,7 +2,6 @@ require 'jars/jericho-html-3.3.jar'
 require 'codemodels'
 require 'codemodels/html/monkey_patching'
 
-
 module CodeModels
 module Html
 
@@ -28,7 +27,6 @@ class Java::NetHtmlparserJericho::Element
 		break_content(self,code).each do |s,e|
 			text = code[s,e-s]			
 			unless text==nil or text.strip.empty?
-				#puts "<<<#{text}>>>"
 				block = TextBlock.new
 				block.value = text
 				block.source = SourceInfo.new
@@ -227,10 +225,10 @@ class Parser < CodeModels::Parser
 					embedded_artifact = EmbeddedArtifact.new
 					embedded_artifact.host_artifact = artifact
 					embedded_artifact.position_in_host = ep
-					#puts "<<<#{embedded_code}>>> #{ep}"
 					begin
 						embedded_root = embedded_parser.parse_artifact(embedded_artifact)
 					rescue Exception => e
+						raise e
 						raise "Problem embedded in '#{node}' at #{model.source.position} parsing '#{embedded_artifact.code}', from position #{ep}: #{e.inspect}"
 					end
 					model.addForeign_asts(embedded_root)
@@ -241,9 +239,7 @@ class Parser < CodeModels::Parser
 
 	def translate_many(code,node,model,dest,node_value=(node.send(dest)),artifact)
 		return unless node_value!=nil
-		#puts "Considering #{model.class}.#{dest} (#{node_value.class})"
 		node_value.each do |el|
-			#puts "\t* #{el.class}"
 			model_el = node_to_model(el,code,artifact)
 			model.send(:"add#{dest.to_s.proper_capitalize}", model_el) if model_el!=nil
 		end
