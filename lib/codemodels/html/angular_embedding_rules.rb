@@ -11,10 +11,14 @@ module Html
 module AngularJs
 
 def self.attribute_value_pos(code,n)
-	bi = n.java_method(:getValueSegment).call.begin
-	ei = n.java_method(:getValueSegment).call.end-1
-	#puts "ATTVALUE<<#{code[bi...ei]}>> #{SourcePosition.from_code_indexes(code,bi,ei)} @@@#{code}@@@"
-	SourcePosition.from_code_indexes(code,bi,ei)
+	begin
+		bi = n.java_method(:getValueSegment).call.begin
+		ei = n.java_method(:getValueSegment).call.end-1
+		SourcePosition.from_code_indexes(code,bi,ei)
+	rescue
+		# TODO more investigation needed
+		return nil
+	end
 end
 
 def self.parser_considering_angular_embedded_code
